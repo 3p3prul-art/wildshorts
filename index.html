@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WildShorts — AI Content Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #0d1a12;
+  --bg2: #132019;
+  --bg3: #1a2d20;
+  --surface: #1e3526;
+  --surface2: #243d2c;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #e8f0e4;
+  --text2: #92ab8a;
+  --text3: #5c7a54;
+  --amber: #e8a030;
+  --amber2: #c47a18;
+  --amber-bg: rgba(232,160,48,0.12);
+  --green: #4caf72;
+  --green-bg: rgba(76,175,114,0.12);
+  --red: #e05050;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+[data-theme="light"] {
+  --bg: #f0f5ee;
+  --bg2: #e4ede0;
+  --bg3: #d8e8d2;
+  --surface: #ffffff;
+  --surface2: #f5faf3;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1a2d1a;
+  --text2: #4a6b42;
+  --text3: #7a9c72;
+  --amber: #b86a00;
+  --amber2: #8a4e00;
+  --amber-bg: rgba(184,106,0,0.1);
+  --green: #2a8048;
+  --green-bg: rgba(42,128,72,0.1);
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* TOPBAR */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 16px;
+  height: 60px;
+}
+.logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--amber); letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.logo span { color: var(--text); font-weight: 400; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--text2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: all 0.15s;
+}
+.icon-btn:hover { background: var(--surface); color: var(--text); }
+.pill-btn {
+  padding: 7px 14px; border-radius: 99px;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--text2);
+  cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s; white-space: nowrap;
+}
+.pill-btn:hover { background: var(--surface); color: var(--text); }
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border-radius: 99px; border: 1px solid var(--border2);
+  background: var(--surface); cursor: pointer;
+  font-size: 13px; color: var(--text2); transition: all 0.15s;
+}
+.user-pill:hover { color: var(--text); }
+.avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--amber); color: #1a1200;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; font-family: 'Oswald', sans-serif;
+}
+
+/* MAIN */
+.main { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+
+.hero { margin-bottom: 32px; }
+.hero-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(28px, 5vw, 42px); font-weight: 700;
+  line-height: 1.1; letter-spacing: 0.5px; color: var(--text);
+}
+.hero-title .accent { color: var(--amber); }
+.hero-sub { font-size: 14px; color: var(--text2); margin-top: 8px; }
+
+/* STATUS PILL */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 99px;
+  border: 1px solid var(--green-bg); background: var(--green-bg);
+  font-size: 12px; color: var(--green); margin-bottom: 24px;
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+/* TABS */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  background: var(--bg2); border-radius: var(--radius); padding: 4px;
+  border: 1px solid var(--border);
+}
+.tab-btn {
+  flex: 1; padding: 10px 8px; border-radius: 8px;
+  border: none; background: transparent; color: var(--text2);
+  cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  font-weight: 500; transition: all 0.2s; white-space: nowrap;
+}
+.tab-btn.active { background: var(--surface); color: var(--text); }
+
+/* CARDS */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
+}
+.card-title {
+  font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 500;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px;
+}
+
+/* FORM */
+.form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+select, input[type=text] {
+  flex: 1; min-width: 140px; padding: 10px 12px;
+  border-radius: 8px; border: 1px solid var(--border2);
+  background: var(--bg); color: var(--text);
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  outline: none; transition: border-color 0.15s;
+}
+select:focus, input:focus { border-color: var(--amber); }
+select option { background: var(--bg2); }
+.btn {
+  padding: 10px 20px; border-radius: 8px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover { background: var(--surface2); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-amber {
+  background: var(--amber); color: #1a1200;
+  border-color: transparent; font-weight: 500;
+}
+.btn-amber:hover { background: var(--amber2); }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 6px; }
+
+/* IDEA ITEMS */
+.idea-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.15s; margin-bottom: 4px;
+}
+.idea-item:hover { background: var(--surface2); border-color: var(--border); }
+.idea-num {
+  font-family: 'Oswald', sans-serif; font-size: 13px;
+  color: var(--text3); min-width: 20px; padding-top: 1px;
+}
+.idea-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.idea-hook { font-size: 12px; color: var(--text2); margin-bottom: 5px; font-style: italic; }
+.badge {
+  display: inline-block; font-size: 11px; padding: 3px 10px;
+  border-radius: 99px; margin: 2px;
+}
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-muted { background: var(--bg2); color: var(--text3); border: 1px solid var(--border); }
+
+/* TITLE OPTIONS */
+.title-opt {
+  padding: 12px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface2);
+  margin-bottom: 8px; transition: all 0.15s;
+}
+.title-opt:hover { border-color: var(--border2); }
+.title-opt.selected { border-color: var(--amber); background: var(--amber-bg); }
+.title-opt-main { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.title-opt-why { font-size: 12px; color: var(--text2); }
+
+/* HASHTAGS */
+.hashtag-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+.hashtag {
+  padding: 5px 12px; border-radius: 99px; font-size: 12px;
+  border: 1px solid var(--border2); color: var(--text2);
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.hashtag:hover { border-color: var(--amber); color: var(--amber); }
+.hashtag.picked { background: var(--amber-bg); color: var(--amber); border-color: rgba(232,160,48,0.4); }
+
+.caption-box {
+  background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 14px; font-size: 13px;
+  color: var(--text); line-height: 1.8; min-height: 60px;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* SCENE CARDS */
+.scene-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 10px;
+}
+.scene-head {
+  background: var(--surface2); padding: 10px 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.scene-num-badge {
+  font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--amber); letter-spacing: 0.5px; flex-shrink: 0;
+}
+.scene-body { padding: 14px; }
+.scene-action { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+.prompt-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px;
+  font-size: 12px; color: var(--text2); line-height: 1.8;
+}
+
+/* HISTORY */
+.history-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 8px; border: 1px solid var(--border);
+  margin-bottom: 6px; background: var(--surface2);
+  transition: all 0.15s;
+}
+.history-item:hover { border-color: var(--border2); }
+.history-title { font-size: 13px; color: var(--text); font-weight: 500; }
+.history-date { font-size: 11px; color: var(--text3); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 440px;
+  animation: fadeUp 0.2s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.modal-title {
+  font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 600;
+  margin-bottom: 20px; color: var(--text);
+}
+.form-label { font-size: 12px; color: var(--text3); margin-bottom: 5px; letter-spacing: 0.5px; display: block; }
+.form-group { margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+
+/* SPINNER */
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(26,18,0,0.3); border-top-color: #1a1200;
+  border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px;
+}
+[data-theme="light"] .spinner { border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.export-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
+.empty-state .es-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); padding: 10px 20px; border-radius: 99px;
+  font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.2s;
+  pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+.hidden { display: none !important; }
+
+@media (max-width: 500px) {
+  .topbar { padding: 0 14px; gap: 8px; }
+  .logo { font-size: 18px; }
+  .main { padding: 20px 14px 60px; }
+  .tabs { overflow-x: auto; }
+  .tab-btn { font-size: 12px; padding: 8px 6px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">WILD<span>SHORTS</span></div>
+  <div class="topbar-right">
+    <button class="pill-btn" id="lang-btn" onclick="toggleLang()">🌐 EN</button>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+    <button class="pill-btn" onclick="openHistory()">📋 History</button>
+    <div id="user-area"></div>
+  </div>
+</header>
+
+<main class="main">
+  <!-- HERO -->
+  <div class="hero">
+    <h1 class="hero-title">AI Content Creator<br>for <span class="accent">Outdoor Shorts</span></h1>
+    <p class="hero-sub" id="hero-sub">Generate ideas, titles, hashtags & AI video prompts — no API key needed.</p>
+  </div>
+
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    <span id="status-text">AI ready — powered by Claude</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-ideas-btn" onclick="switchTab('ideas')" data-i="tab_ideas">💡 Ideas</button>
+    <button class="tab-btn" id="tab-title-btn" onclick="switchTab('title')" data-i="tab_title">🏷 Title & Hashtag</button>
+    <button class="tab-btn" id="tab-scenes-btn" onclick="switchTab('scenes')" data-i="tab_scenes">🎬 Scenes & Prompts</button>
+  </div>
+
+  <!-- TAB: IDEAS -->
+  <div id="tab-ideas">
+    <div class="card">
+      <div class="card-title" data-i="filter_label">Content Filter</div>
+      <div class="form-row">
+        <select id="category">
+          <option value="hunting wild game deep forest USA">🦌 Hunting</option>
+          <option value="building shelter or cabin in swamp or wetland">🏕 Shelter / Swamp</option>
+          <option value="solo extreme wilderness camping survival">⛺ Extreme Camping</option>
+          <option value="wilderness survival skills bushcraft outdoors">🪓 Survival Skills</option>
+          <option value="wild fishing cooking catch outdoors">🎣 Fishing & Cook</option>
+          <option value="random outdoor adventure wilderness USA">🌲 All / Random</option>
+        </select>
+        <select id="tone">
+          <option value="suspense and tension">😰 Suspense</option>
+          <option value="satisfying ASMR">😌 Satisfying</option>
+          <option value="epic challenge">💪 Challenge</option>
+          <option value="cinematic storytelling">🎥 Cinematic</option>
+        </select>
+      </div>
+      <button class="btn btn-amber" id="btn-ideas" onclick="generateIdeas()"><span data-i="gen_ideas">Generate 5 Ideas</span></button>
+    </div>
+    <div id="ideas-result" class="hidden">
+      <div class="card">
+        <div class="card-title" data-i="click_idea">Click an idea to continue →</div>
+        <div id="ideas-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: TITLE & HASHTAG -->
+  <div id="tab-title" class="hidden">
+    <div class="card">
+      <div class="card-title" data-i="concept_label">Video Concept</div>
+      <div class="form-row">
+        <input type="text" id="title-concept" placeholder="e.g. Man builds floating cabin in Louisiana swamp..." />
+      </div>
+      <button class="btn btn-amber" id="btn-title" onclick="generateTitleHashtag()"><span data-i="gen_title">Generate Titles & Hashtags</span></button>
+    </div>
+    <div id="title-result" class="hidden">
+      <div class="card">
+        <div class="card-title" data-i="pick_title">Pick a title</div>
+        <div id="title-list"></div>
+        <hr class="divider">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="card-title" style="margin-bottom:0;" data-i="hashtag_label">Hashtags</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-sm" onclick="selectAllTags()" data-i="select_all">All</button>
+            <button class="btn btn-sm" onclick="clearTags()" data-i="clear">Clear</button>
+          </div>
+        </div>
+        <div class="hashtag-wrap" id="hashtag-list"></div>
+        <hr class="divider">
+        <div class="card-title" data-i="caption_label">Ready Caption</div>
+        <div class="caption-box" id="caption-preview">—</div>
+        <div class="export-bar">
+          <button class="btn btn-amber btn-sm" onclick="copyCaption()" data-i="copy_caption">📋 Copy caption</button>
+          <button class="btn btn-sm" onclick="exportPDF()" data-i="export_pdf">🖨 Export PDF</button>
+          <button class="btn btn-sm" onclick="exportNotion()" data-i="export_notion">📝 Copy for Notion</button>
+          <button class="btn btn-sm" onclick="saveToHistory('title')" data-i="save_hist">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SCENES -->
+  <div id="tab-scenes" class="hidden">
+    <div class="card">
+      <div class="card-title" data-i="scene_setup">Scene Setup</div>
+      <div class="form-row">
+        <input type="text" id="video-title" placeholder="e.g. Man builds hidden cabin in Louisiana swamp..." />
+      </div>
+      <div class="form-row">
+        <select id="video-style">
+          <option value="cinematic drone shots combined with extreme close-up detail shots, golden hour lighting">🎥 Cinematic (drone + detail)</option>
+          <option value="raw handheld POV shaky footage, natural lighting, immersive">📱 Raw POV</option>
+          <option value="dramatic time-lapse sequences with close-up detail cuts">⏩ Time-lapse</option>
+          <option value="dramatic slow-motion 240fps, cinematic color grade">🌀 Slow Motion</option>
+        </select>
+        <select id="duration">
+          <option value="30">⏱ 30s (4 scenes)</option>
+          <option value="45">⏱ 45s (5 scenes)</option>
+          <option value="60">⏱ 60s (6 scenes)</option>
+        </select>
+      </div>
+      <button class="btn btn-amber" id="btn-scenes" onclick="generateScenes()"><span data-i="gen_scenes">Generate Scenes & Prompts</span></button>
+    </div>
+    <div id="scenes-result" class="hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="card-title" style="margin-bottom:0;" data-i="ai_prompts">AI Video Prompts</div>
+          <button class="btn btn-sm" onclick="copyAllScenes()" data-i="copy_all">Copy all</button>
+        </div>
+        <div id="scenes-list"></div>
+        <div style="margin-top:10px;">
+          <span class="badge badge-muted">Sora</span>
+          <span class="badge badge-muted">Runway Gen-4</span>
+          <span class="badge badge-muted">Kling AI</span>
+        </div>
+        <div class="export-bar">
+          <button class="btn btn-sm" onclick="exportScenesPDF()" data-i="export_pdf">🖨 Export PDF</button>
+          <button class="btn btn-sm" onclick="exportNotion()" data-i="export_notion">📝 Copy for Notion</button>
+          <button class="btn btn-sm" onclick="saveToHistory('scenes')" data-i="save_hist">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="history-modal">
+  <div class="modal" style="max-width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0;" data-i="history_title">History</div>
+      <button class="icon-btn" onclick="closeHistory()">✕</button>
+    </div>
+    <div id="history-list"></div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+      <button class="btn btn-sm" onclick="clearHistory()" style="color:var(--red);" data-i="clear_hist">Clear all</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <div class="modal-title" data-i="sign_in_title">Sign in</div>
+    <div class="form-group">
+      <label class="form-label" data-i="username_label">USERNAME</label>
+      <input type="text" id="login-username" placeholder="yourname" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-amber" onclick="doLogin()" data-i="login_btn">Sign in</button>
+      <button class="btn" onclick="closeLogin()" data-i="cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────
+let lang = localStorage.getItem('wslang') || 'en';
+let theme = localStorage.getItem('wstheme') || 'dark';
+let currentUser = localStorage.getItem('wsuser') || '';
+let pickedTitle = '';
+let currentScenes = [];
+let currentCaption = '';
+
+// ─── i18n ─────────────────────────────────────────────
+const i18n = {
+  en: {
+    tab_ideas:'💡 Ideas', tab_title:'🏷 Title & Hashtag', tab_scenes:'🎬 Scenes & Prompts',
+    filter_label:'CONTENT FILTER', gen_ideas:'Generate 5 Ideas', click_idea:'Click an idea to continue →',
+    concept_label:'VIDEO CONCEPT', gen_title:'Generate Titles & Hashtags',
+    pick_title:'PICK A TITLE', hashtag_label:'HASHTAGS',
+    select_all:'All', clear:'Clear', caption_label:'READY CAPTION',
+    copy_caption:'📋 Copy caption', export_pdf:'🖨 Export PDF', export_notion:'📝 Copy for Notion',
+    save_hist:'💾 Save', scene_setup:'SCENE SETUP', gen_scenes:'Generate Scenes & Prompts',
+    ai_prompts:'AI VIDEO PROMPTS', copy_all:'Copy all',
+    history_title:'History', clear_hist:'Clear all',
+    username_label:'USERNAME', login_btn:'Sign in', cancel:'Cancel', sign_in_title:'Sign in',
+    hero_sub:'Generate ideas, titles, hashtags & AI video prompts — no API key needed.',
+    status_ready:'AI ready — powered by Claude',
+    saved:'Saved!', copied:'Copied!', cleared:'History cleared',
+    no_hist:'No history yet. Generate some content first!',
+  },
+  id: {
+    tab_ideas:'💡 Ide', tab_title:'🏷 Judul & Hashtag', tab_scenes:'🎬 Scene & Prompt',
+    filter_label:'FILTER KONTEN', gen_ideas:'Generate 5 Ide', click_idea:'Klik ide untuk lanjut →',
+    concept_label:'KONSEP VIDEO', gen_title:'Generate Judul & Hashtag',
+    pick_title:'PILIH JUDUL', hashtag_label:'HASHTAG',
+    select_all:'Semua', clear:'Reset', caption_label:'CAPTION SIAP PAKAI',
+    copy_caption:'📋 Salin caption', export_pdf:'🖨 Export PDF', export_notion:'📝 Copy ke Notion',
+    save_hist:'💾 Simpan', scene_setup:'SETUP SCENE', gen_scenes:'Generate Scene & Prompt',
+    ai_prompts:'AI VIDEO PROMPTS', copy_all:'Salin semua',
+    history_title:'Riwayat', clear_hist:'Hapus semua',
+    username_label:'USERNAME', login_btn:'Masuk', cancel:'Batal', sign_in_title:'Masuk',
+    hero_sub:'Buat ide, judul, hashtag & prompt AI video — langsung pakai, tanpa API key.',
+    status_ready:'AI siap — powered by Claude',
+    saved:'Tersimpan!', copied:'Tersalin!', cleared:'History dihapus',
+    no_hist:'Belum ada history. Generate konten dulu!',
+  }
+};
+function t(k) { return i18n[lang][k] || k; }
+
+// ─── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(); applyLang(); updateUserArea();
+});
+
+// ─── THEME ────────────────────────────────────────────
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('wstheme', theme);
+  applyTheme();
+}
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').textContent = theme === 'dark' ? '🌙' : '☀️';
+}
+
+// ─── LANG ─────────────────────────────────────────────
+function toggleLang() {
+  lang = lang === 'en' ? 'id' : 'en';
+  localStorage.setItem('wslang', lang);
+  applyLang();
+}
+function applyLang() {
+  document.getElementById('lang-btn').textContent = '🌐 ' + lang.toUpperCase();
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const k = el.getAttribute('data-i');
+    if (i18n[lang][k]) el.textContent = i18n[lang][k];
+  });
+  document.getElementById('hero-sub').textContent = t('hero_sub');
+  document.getElementById('status-text').textContent = t('status_ready');
+  updateUserArea();
+}
+
+// ─── USER ─────────────────────────────────────────────
+function updateUserArea() {
+  const area = document.getElementById('user-area');
+  if (currentUser) {
+    area.innerHTML = `<div class="user-pill" onclick="logOut()"><div class="avatar">${currentUser.slice(0,2).toUpperCase()}</div>${currentUser}</div>`;
+  } else {
+    area.innerHTML = `<button class="pill-btn" onclick="openLogin()">${lang==='id'?'Masuk':'Sign in'}</button>`;
+  }
+}
+function openLogin() { document.getElementById('login-modal').classList.add('open'); }
+function closeLogin() { document.getElementById('login-modal').classList.remove('open'); }
+function doLogin() {
+  const u = document.getElementById('login-username').value.trim();
+  if (!u) return;
+  currentUser = u; localStorage.setItem('wsuser', u);
+  updateUserArea(); closeLogin();
+  showToast('Welcome, ' + u + '! 🌲');
+}
+function logOut() {
+  currentUser = ''; localStorage.removeItem('wsuser'); updateUserArea();
+}
+
+// ─── TABS ─────────────────────────────────────────────
+function switchTab(tab) {
+  ['ideas','title','scenes'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+    document.getElementById('tab-'+t+'-btn').classList.toggle('active', t===tab);
+  });
+}
+
+// ─── API CALL — calls /api/chat (serverless proxy) ────
+async function callAPI(prompt) {
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.text;
+}
+function parseJSON(raw) { return JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+
+// ─── IDEAS ────────────────────────────────────────────
+async function generateIdeas() {
+  const btn = document.getElementById('btn-ideas');
+  setLoading(btn, true);
+  const cat = document.getElementById('category').value;
+  const tone = document.getElementById('tone').value;
+  try {
+    const raw = await callAPI(`You are a YouTube Shorts content strategist for outdoor adventure.
+Generate 5 YouTube Shorts ideas for an American male outdoor adventurer.
+Category: ${cat}. Tone: ${tone}. Target: US & international (survival/wilderness/bushcraft fans).
+Return ONLY JSON array: [{"title":"...","hook":"...","viral":"..."}]
+- title: English max 80 chars scroll-stopping
+- hook: opening 3-second line in English
+- viral: 1 sentence WHY this goes viral (${lang==='id'?'Bahasa Indonesia':'English'})`);
+    renderIdeas(parseJSON(raw));
+    document.getElementById('ideas-result').classList.remove('hidden');
+  } catch(e) { showToast('Error: ' + e.message); }
+  setLoading(btn, false, t('gen_ideas'));
+}
+function renderIdeas(ideas) {
+  document.getElementById('ideas-list').innerHTML = ideas.map((idea,i) => `
+    <div class="idea-item" onclick="useIdea('${escQ(idea.title)}')">
+      <div class="idea-num">${i+1}</div>
+      <div style="flex:1;">
+        <div class="idea-title">${idea.title}</div>
+        <div class="idea-hook">"${idea.hook}"</div>
+        <span class="badge badge-amber">${idea.viral}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);">→</div>
+    </div>`).join('');
+}
+function useIdea(title) {
+  document.getElementById('title-concept').value = title;
+  document.getElementById('video-title').value = title;
+  switchTab('title');
+}
+
+// ─── TITLE & HASHTAG ──────────────────────────────────
+async function generateTitleHashtag() {
+  const concept = document.getElementById('title-concept').value.trim();
+  if (!concept) { showToast(lang==='id'?'Isi konsep dulu!':'Enter a concept first!'); return; }
+  const btn = document.getElementById('btn-title');
+  setLoading(btn, true);
+  try {
+    const raw = await callAPI(`You are a YouTube SEO expert for outdoor adventure content.
+Concept: "${concept}". Character: American male outdoor adventurer.
+Return ONLY valid JSON:
+{"titles":[{"text":"...","type":"curiosity","why":"..."},{"text":"...","type":"emotional","why":"..."},{"text":"...","type":"challenge","why":"..."},{"text":"...","type":"satisfying","why":"..."},{"text":"...","type":"seo","why":"..."}],"hashtags":["#..."]}
+- titles: 5 English options max 100 chars, type = curiosity/emotional/challenge/satisfying/seo
+- why: 1 sentence ${lang==='id'?'Bahasa Indonesia':'English'} why this works
+- hashtags: exactly 30 tags mixing high-volume + niche outdoor/adventure/survival`);
+    const data = parseJSON(raw);
+    pickedTitle = '';
+    renderTitles(data.titles || []);
+    renderHashtags(data.hashtags || []);
+    document.getElementById('title-result').classList.remove('hidden');
+    document.getElementById('video-title').value = concept;
+    updateCaption();
+  } catch(e) { showToast('Error: ' + e.message); }
+  setLoading(btn, false, t('gen_title'));
+}
+const typeColor = {curiosity:'badge-amber',emotional:'badge-amber',challenge:'badge-green',satisfying:'badge-green',seo:'badge-muted'};
+function renderTitles(titles) {
+  document.getElementById('title-list').innerHTML = titles.map(t => `
+    <div class="title-opt" onclick="selectTitle(this,'${escQ(t.text)}')">
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <span class="badge ${typeColor[t.type]||'badge-muted'}" style="margin:0;flex-shrink:0;">${t.type}</span>
+        <div>
+          <div class="title-opt-main">${t.text}</div>
+          <div class="title-opt-why">${t.why}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function selectTitle(el, text) {
+  document.querySelectorAll('.title-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected'); pickedTitle = text; updateCaption();
+}
+function renderHashtags(tags) {
+  document.getElementById('hashtag-list').innerHTML = tags.map(tag =>
+    `<span class="hashtag picked" onclick="toggleTag(this)">${tag}</span>`).join('');
+  updateCaption();
+}
+function toggleTag(el) { el.classList.toggle('picked'); updateCaption(); }
+function selectAllTags() { document.querySelectorAll('.hashtag').forEach(el=>el.classList.add('picked')); updateCaption(); }
+function clearTags() { document.querySelectorAll('.hashtag').forEach(el=>el.classList.remove('picked')); updateCaption(); }
+function updateCaption() {
+  const tags = Array.from(document.querySelectorAll('.hashtag.picked')).map(el=>el.textContent);
+  let c = '';
+  if (pickedTitle) c += pickedTitle + '\n\n';
+  if (tags.length) c += tags.join(' ');
+  currentCaption = c.trim();
+  document.getElementById('caption-preview').textContent = currentCaption || '—';
+}
+function copyCaption() {
+  if (!currentCaption) return;
+  navigator.clipboard.writeText(currentCaption).then(()=>showToast(t('copied')));
+}
+
+// ─── SCENES ───────────────────────────────────────────
+async function generateScenes() {
+  const title = document.getElementById('video-title').value.trim();
+  if (!title) { showToast(lang==='id'?'Isi judul dulu!':'Enter a title first!'); return; }
+  const btn = document.getElementById('btn-scenes');
+  setLoading(btn, true);
+  const vstyle = document.getElementById('video-style').value;
+  const dur = document.getElementById('duration').value;
+  const count = dur==='30'?4:dur==='45'?5:6;
+  try {
+    const raw = await callAPI(`You are an AI video director for short-form outdoor adventure content.
+Title: "${title}". Duration: ${dur}s. Style: ${vstyle}. Scenes: ${count}.
+Return ONLY valid JSON array:
+[{"scene":1,"title":"...","duration":"7s","action":"...","ai_prompt":"..."}]
+- title: short scene label
+- action: what happens (${lang==='id'?'Bahasa Indonesia':'English'}, 1 sentence)
+- ai_prompt: detailed AI video prompt in English — subject, action, environment, lighting, camera, color grade, mood. Optimized for Sora/Runway/Kling.`);
+    currentScenes = parseJSON(raw);
+    renderScenes(currentScenes);
+    document.getElementById('scenes-result').classList.remove('hidden');
+  } catch(e) { showToast('Error: ' + e.message); }
+  setLoading(btn, false, t('gen_scenes'));
+}
+function renderScenes(scenes) {
+  document.getElementById('scenes-list').innerHTML = scenes.map(s => `
+    <div class="scene-card">
+      <div class="scene-head">
+        <span class="scene-num-badge">SCENE ${s.scene} · ${s.duration}</span>
+        <span style="font-size:13px;font-weight:500;color:var(--text);flex:1;padding:0 8px;">${s.title}</span>
+        <button class="btn btn-sm" onclick="copyText(this,'${escQ(s.ai_prompt)}')">Copy</button>
+      </div>
+      <div class="scene-body">
+        <div class="scene-action">${s.action}</div>
+        <div class="prompt-box">${s.ai_prompt}</div>
+      </div>
+    </div>`).join('');
+}
+function copyAllScenes() {
+  const all = currentScenes.map(s=>`--- Scene ${s.scene}: ${s.title} ---\n${s.ai_prompt}`).join('\n\n');
+  navigator.clipboard.writeText(all).then(()=>showToast(t('copied')));
+}
+
+// ─── EXPORT ───────────────────────────────────────────
+function exportPDF() {
+  const concept = document.getElementById('title-concept').value || 'WildShorts';
+  const w = window.open('','','width=700,height=900');
+  const tags = Array.from(document.querySelectorAll('.hashtag.picked')).map(el=>el.textContent);
+  w.document.write(`<html><head><title>${concept}</title>
+  <style>body{font-family:sans-serif;padding:32px;color:#111;max-width:650px;}
+  h1{font-size:22px;margin-bottom:4px;}h2{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:1px;margin:20px 0 8px;}
+  p{font-size:13px;line-height:1.7;}.tag{display:inline-block;background:#e8f0e4;padding:2px 9px;border-radius:99px;font-size:12px;margin:2px;}
+  </style></head><body>
+  <h1>${concept}</h1>
+  ${pickedTitle?`<h2>Title</h2><p><strong>${pickedTitle}</strong></p>`:''}
+  ${tags.length?`<h2>Hashtags</h2><p>${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</p>`:''}
+  </body></html>`);
+  w.document.close(); w.print();
+}
+function exportScenesPDF() {
+  const w = window.open('','','width=700,height=900');
+  w.document.write(`<html><head><title>WildShorts Scenes</title>
+  <style>body{font-family:sans-serif;padding:32px;color:#111;}
+  h2{font-size:12px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-top:20px;}
+  p{font-size:12px;line-height:1.8;background:#f5f5f5;padding:12px;border-radius:6px;}
+  </style></head><body>`);
+  currentScenes.forEach(s => w.document.write(`<h2>Scene ${s.scene}: ${s.title} (${s.duration})</h2><p>${s.ai_prompt}</p>`));
+  w.document.write(`</body></html>`); w.document.close(); w.print();
+}
+function exportNotion() {
+  let md = '';
+  const concept = document.getElementById(currentScenes.length?'video-title':'title-concept').value;
+  if (concept) md += `# ${concept}\n\n`;
+  if (pickedTitle) md += `**Title:** ${pickedTitle}\n\n`;
+  const tags = Array.from(document.querySelectorAll('.hashtag.picked')).map(el=>el.textContent);
+  if (tags.length) md += tags.join(' ') + '\n\n';
+  if (currentScenes.length) {
+    md += `## Scenes\n\n`;
+    currentScenes.forEach(s => md += `### Scene ${s.scene}: ${s.title}\n${s.action}\n\n> ${s.ai_prompt}\n\n`);
+  }
+  navigator.clipboard.writeText(md).then(()=>showToast(lang==='id'?'Siap di-paste ke Notion!':'Ready to paste in Notion!'));
+}
+
+// ─── HISTORY ──────────────────────────────────────────
+function saveToHistory(type) {
+  const hist = JSON.parse(localStorage.getItem('wshist')||'[]');
+  const concept = document.getElementById(type==='title'?'title-concept':'video-title').value;
+  hist.unshift({ type, concept, title: pickedTitle||concept, date: new Date().toLocaleDateString(), caption: currentCaption, scenes: currentScenes });
+  if (hist.length > 20) hist.pop();
+  localStorage.setItem('wshist', JSON.stringify(hist));
+  showToast(t('saved'));
+}
+function openHistory() {
+  const hist = JSON.parse(localStorage.getItem('wshist')||'[]');
+  const list = document.getElementById('history-list');
+  if (!hist.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🌲</div><p>${t('no_hist')}</p></div>`;
+  } else {
+    list.innerHTML = hist.map((h,i)=>`
+      <div class="history-item">
+        <div style="font-size:18px;">${h.type==='title'?'🏷':'🎬'}</div>
+        <div style="flex:1;">
+          <div class="history-title">${h.title||h.concept}</div>
+          <div class="history-date">${h.date}</div>
+        </div>
+        <button class="btn btn-sm" onclick="loadHistory(${i})">Load</button>
+      </div>`).join('');
+  }
+  document.getElementById('history-modal').classList.add('open');
+}
+function loadHistory(i) {
+  const h = JSON.parse(localStorage.getItem('wshist')||'[]')[i];
+  if (!h) return;
+  closeHistory();
+  if (h.type==='title') {
+    document.getElementById('title-concept').value = h.concept||'';
+    if (h.caption) { currentCaption = h.caption; document.getElementById('caption-preview').textContent = h.caption; }
+    switchTab('title');
+  } else {
+    document.getElementById('video-title').value = h.concept||'';
+    if (h.scenes&&h.scenes.length) { currentScenes=h.scenes; renderScenes(h.scenes); document.getElementById('scenes-result').classList.remove('hidden'); }
+    switchTab('scenes');
+  }
+}
+function closeHistory() { document.getElementById('history-modal').classList.remove('open'); }
+function clearHistory() { localStorage.removeItem('wshist'); showToast(t('cleared')); closeHistory(); }
+
+// ─── UTILS ────────────────────────────────────────────
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(()=>{ btn.textContent='✓'; setTimeout(()=>btn.textContent='Copy',1500); });
+}
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2400);
+}
+function setLoading(btn, loading, label) {
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<span class="spinner"></span>' : `<span>${label||''}</span>`;
+}
+function escQ(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' '); }
+
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
